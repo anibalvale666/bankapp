@@ -1,5 +1,6 @@
 package com.bankking.service.Impl;
 
+import com.bankking.exception.ErrorResponse;
 import com.bankking.models.Cliente;
 import com.bankking.models.Cuenta;
 import com.bankking.models.Movimiento;
@@ -8,6 +9,8 @@ import com.bankking.repository.CuentaRepository;
 import com.bankking.repository.MovimientoRepository;
 import com.bankking.service.MovimientoService;
 import com.bankking.utils.constant.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -15,14 +18,17 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+
+import static com.bankking.utils.constant.Constants.CODE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND;
+import static com.bankking.utils.constant.Constants.MESSAGE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND;
 
 @Service
 public class MovimientoServiceImpl implements MovimientoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MovimientoServiceImpl.class);
+
 
     @Autowired
     private MovimientoRepository movimientoRepository;
@@ -41,31 +47,39 @@ public class MovimientoServiceImpl implements MovimientoService {
 
     @Override
     public Mono<Movimiento> saveMovimiento(Movimiento movimiento) throws Exception {
+        logger.info("Iniciando guardar movimiento");
 
         //si es debito alidar cuanto ha retirado durante el dia tope max 1000
         Optional<Cliente> cliente = clienteRepository.findByClienteId(movimiento.getClienteId());
         Optional<Cuenta> cuenta = cuentaRepository.findById(movimiento.getCuentaId());
 
         if(cliente.isEmpty() || cuenta.isEmpty()) {
-            return Mono.error(new Exception(Constants.MESSAGE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND));
+            return Mono.error(new ErrorResponse(
+                Constants.CODE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND,
+                Constants.MESSAGE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND));
         }
-        // preguntar si es debito (restar) o credito ( sumar)
+        // preguntar si retiro  (restar) o deposito ( sumar)
         Double saldo = obtenerUltimoSaldo(cuenta.get().getId(), cuenta.get().getSaldoInicial());
-        if(movimiento.getTipoMovimiento().equals(Constants.CREDITO)) {
+        if(movimiento.getTipoMovimiento().equals(Constants.DEPOSITO)) {
             movimiento.setSaldo(saldo + movimiento.getValor());
         } else {
             // obtener acumulado
             Double accum = obtenerAcumulado(cuenta.get().getClienteId());
             if(saldo < movimiento.getValor()) {
-                return Mono.error(new Exception(Constants.MESSAGE_ERROR_UNAVAILABLE_BALANCE));
+                return Mono.error(new ErrorResponse(
+                    Constants.CODE_MESSAGE_ERROR_UNAVAILABLE_BALANCE,
+                    Constants.MESSAGE_ERROR_UNAVAILABLE_BALANCE));
             }
             if(accum + movimiento.getValor() > 1000.0) {
-                return Mono.error(new Exception(Constants.MESSAGE_ERROR_DAILY_QUOTA_EXCEEDED));
+                return Mono.error(new ErrorResponse(
+                    Constants.CODE_MESSAGE_ERROR_DAILY_QUOTA_EXCEEDED,
+                    Constants.MESSAGE_ERROR_DAILY_QUOTA_EXCEEDED));
             }
             movimiento.setSaldo(saldo - movimiento.getValor());
         }
         movimiento.setClienteId(cliente.get().getClienteId());
         movimiento.setCuentaId(cuenta.get().getId());
+        logger.info("guardado con exito");
         return Mono.just(movimientoRepository.save(movimiento));
     }
 
@@ -76,7 +90,7 @@ public class MovimientoServiceImpl implements MovimientoService {
 
         return movimientoRepository.findByClienteId(clienteId)
             .stream()
-            .filter(movimiento -> movimiento.getTipoMovimiento().equals(Constants.DEBITO))
+            .filter(movimiento -> movimiento.getTipoMovimiento().equals(Constants.RETIRO))
             .filter(movimiento -> {
                 LocalDate fechaMovimiento = movimiento.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 return fechaMovimiento.equals(fechaActual);
@@ -122,24 +136,6 @@ public class MovimientoServiceImpl implements MovimientoService {
         Movimiento toDelete = movimientoRepository.findById(id).get();
         movimientoRepository.delete(toDelete);
         return true;
-
-        ExecutorService executor = Executors.newFixedThreadPool(heavyDocs,4);
-
-        // procesamiento 4 hilos
-        // ...
-        try {
-            Thread.sleep(20000);
-        } catch( InterruptedException ie ){
-            Thread.currentThread().interrupt();
-        }
-
-        executor.shutdown();
-
-        while (!executor.isTerminated()) {
-            executor.awaitTermination(20000, TimeUnit.MILLISECONDS);
-        }
-
-
     }
 
 

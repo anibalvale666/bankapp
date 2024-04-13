@@ -1,5 +1,6 @@
 package com.bankking.service.Impl;
 
+import com.bankking.exception.ErrorResponse;
 import com.bankking.models.Cliente;
 import com.bankking.models.Cuenta;
 import com.bankking.models.Movimiento;
@@ -9,6 +10,9 @@ import com.bankking.repository.ClienteRepository;
 import com.bankking.repository.CuentaRepository;
 import com.bankking.repository.MovimientoRepository;
 import com.bankking.service.ReporteService;
+import com.bankking.utils.constant.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -17,8 +21,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.bankking.utils.constant.Constants.*;
+
+
 @Service
 public class ReporteServiceImpl implements ReporteService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReporteServiceImpl.class);
+
     @Autowired
     private MovimientoRepository movimientoRepository;
 
@@ -31,6 +41,8 @@ public class ReporteServiceImpl implements ReporteService {
     @Override
     public Mono<Reporte> calcularReporte(String fechaInicio, String fechaFin, Long clienteId) {
 
+        logger.info("Iniciando generar reporte");
+
         Reporte reporte = new Reporte();
         List<MovimientosReporte> movimientosReporteList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -38,10 +50,18 @@ public class ReporteServiceImpl implements ReporteService {
             Date fechaIn = sdf.parse(fechaInicio);
             Date fechaFi= sdf.parse(fechaFin);
 
+            if (fechaIn.compareTo(fechaFi) >= 0) {
+                return Mono.error(new ErrorResponse(
+                    Constants.CODE_MESSAGE_ERROR_FECHAS,
+                    Constants.MESSAGE_ERROR_FECHAS));
+            }
+
             // obtenemos el cliente
             Optional<Cliente> cliente = clienteRepository.findByClienteId(clienteId);
             if(cliente.isEmpty()) {
-                return Mono.error(new Exception("cliente o cuenta inexistente"));
+                return Mono.error(new ErrorResponse(
+                    Constants.CODE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND,
+                    Constants.MESSAGE_ERROR_CLIENT_OR_ACCOUNT_NOT_FOUND));
             }
 
             // obtenemos todos los movimientos del cliente y los filtraos por fechas
@@ -84,6 +104,7 @@ public class ReporteServiceImpl implements ReporteService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        logger.info("Terminando generar reporte");
         return Mono.just(reporte);
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Reporte {
+public class  Reporte {
     List<MovimientosReporte> movimientos;
 
 }

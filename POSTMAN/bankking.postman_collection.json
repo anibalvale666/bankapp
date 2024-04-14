@@ -255,7 +255,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2023-06-01\",\r\n  \"tipoMovimiento\": \"credito\",\r\n  \"valor\": 150.0,\r\n  \"clienteId\": 2230,\r\n  \"cuentaId\": 6\r\n}",
+							"raw": "{\r\n  \"fecha\": \"2023-09-26T00:00:00.000+00:00\",\r\n  \"tipoMovimiento\": \"deposito\",\r\n  \"valor\": 200,\r\n  \"clienteId\": 2228,\r\n  \"cuentaId\": 3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -320,7 +320,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8081/movimientos/4",
+							"raw": "http://localhost:8081/movimientos/21",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -328,7 +328,7 @@
 							"port": "8081",
 							"path": [
 								"movimientos",
-								"4"
+								"21"
 							]
 						}
 					},
@@ -345,7 +345,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8081/reportes?fechaIni=01/04/2022&fechaFin=22/10/2022&cliente=2229",
+							"raw": "http://localhost:8081/reportes?fechaIni=01/04/2022&fechaFin=22/10/2024&cliente=2228",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -361,11 +361,11 @@
 								},
 								{
 									"key": "fechaFin",
-									"value": "22/10/2022"
+									"value": "22/10/2024"
 								},
 								{
 									"key": "cliente",
-									"value": "2229"
+									"value": "2228"
 								}
 							]
 						}

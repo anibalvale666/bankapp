@@ -19,5 +19,27 @@ ademas el sistema puede darnos reportes acerca de los movimientos por cuenta de 
 3. En la carpeta ```POSTMAN``` se encuentran los request para probar el proyecto, ordenado por carpetas
 4. En la carpeta ```proyecto-final``` se encuentra el BackEnd.
 
+
+# EJEMPLOS
+### Clientes
+![Clientes](img/clientes.png)
+
+### Cuentas
+![Cuentas](img/cuentas.png)
+
+### Movimientos
+#### Obtener movimientos
+![Movimientos](img/movimiento.png)
+#### Obtener movimientos Error
+![Movimientos](img/movimiento_error.png)
+
+### Reporte
+#### Obtener Reporte
+![Reporte](img/reporte.png)
+#### Obtener Reporte Error
+![Reporte](img/reporte_error.png)
+
+
+
 # Credits
 Anibal Valenzuela: [Git Hub](https://github.com/anibalvale666)

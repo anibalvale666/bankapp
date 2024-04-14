@@ -1,5 +1,6 @@
 package com.bankking.service.Impl;
 
+import com.bankking.exception.ErrorResponse;
 import com.bankking.models.Cliente;
 import com.bankking.models.Cuenta;
 import com.bankking.models.Movimiento;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,21 +74,21 @@ class ReporteServiceImplTest {
     @DisplayName("Execute CalcularReporte And Then Return Error")
     void calcularReporteReturnError() {
 
-        String fechaIni = "01/01/2023";
-        String fechaFin = "31/01/2023";
+        String fechaIni = "31/01/2023";
+        String fechaFin = "01/01/2023";
         Long clientId = 12345L;
-        when(clienteRepository.findByClienteId(anyLong()))
-            .thenReturn(Optional.empty());
-
 
         Mono<Reporte> reporteMono = reporteService
             .calcularReporte(fechaIni, fechaFin, clientId);
 
         StepVerifier.create(reporteMono)
-            .expectErrorMatches(
-                throwable -> throwable instanceof Exception && throwable.getMessage()
-                    .equals("cliente o cuenta inexistente"))
+            .expectErrorMatches(throwable -> throwable instanceof ErrorResponse &&
+                ((ErrorResponse) throwable).getMessage().contains("ERROR EN LAS FECHAS"))
             .verify();
+
+        verifyNoInteractions(clienteRepository);
+        verifyNoInteractions(cuentaRepository);
+        verifyNoInteractions(movimientoRepository);
     }
 
     private Cliente getCliente() {

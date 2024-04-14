@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-09-2023 a las 05:45:54
+-- Tiempo de generación: 14-04-2024 a las 15:58:51
 -- Versión del servidor: 10.4.25-MariaDB
 -- Versión de PHP: 8.1.10
 
@@ -90,10 +90,11 @@ CREATE TABLE `movimiento` (
 --
 
 INSERT INTO `movimiento` (`id`, `fecha`, `saldo`, `tipo_movimiento`, `valor`, `cliente_id`, `cuenta_id`) VALUES
-(1, '2023-09-25 19:00:00', 1425, 'debito', 575, 2228, 3),
-(2, '2022-10-01 19:00:00', 700, 'credito', 600, 2229, 4),
-(3, '2022-02-07 19:00:00', 0, 'debito', 540, 2229, 5),
-(4, '2023-05-31 19:00:00', 150, 'credito', 150, 2230, 6);
+(1, '2023-09-25 19:00:00', 1425, 'retiro', 575, 2228, 3),
+(2, '2022-10-01 19:00:00', 700, 'deposito', 600, 2229, 4),
+(3, '2022-02-07 19:00:00', 0, 'retiro', 540, 2229, 5),
+(4, '2023-05-31 19:00:00', 150, 'deposito', 150, 2230, 6),
+(19, '2023-09-26 20:00:00', 625, 'retiro', 800, 2228, 3);
 
 -- --------------------------------------------------------
 
@@ -169,7 +170,7 @@ ALTER TABLE `cuenta`
 -- AUTO_INCREMENT de la tabla `movimiento`
 --
 ALTER TABLE `movimiento`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `persona`
